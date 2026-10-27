@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="120" viewBox="0 0 400 120">
+  <rect width="400" height="120" rx="12" fill="#0f172a"/>
+  <text x="200" y="60" font-family="monospace" font-size="42" font-weight="bold" fill="#38bdf8" text-anchor="middle">AI-X CLI</text>
+  <text x="200" y="90" font-family="monospace" font-size="14" fill="#94a3b8" text-anchor="middle">500+ Providers • 1000+ Models</text>
+</svg>
