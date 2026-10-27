@@ -9,6 +9,7 @@ const providers = JSON.parse(readFileSync(join(ROOT, 'data/providers.json'), 'ut
 const models = JSON.parse(readFileSync(join(ROOT, 'data/models.json'), 'utf8'));
 
 const ESC = '\x1b[';
+const C={reset:'\x1b[0m',bold:'\x1b[1m',dim:'\x1b[2m',cyan:'\x1b[36m',blue:'\x1b[34m',green:'\x1b[32m',yellow:'\x1b[33m',magenta:'\x1b[35m',white:'\x1b[37m',gray:'\x1b[90m'};
 const clear = () => process.stdout.write(ESC + '2J' + ESC + 'H');
 const hideCursor = () => process.stdout.write(ESC + '?25l');
 const showCursor = () => process.stdout.write(ESC + '?25h');
@@ -22,7 +23,7 @@ function box(title, lines) {
   const bot = '└' + '─'.repeat(width - 2) + '┘';
   const out = [top];
   if (title) {
-    out.push('│ ' + title.padEnd(width - 3) + '│');
+    out.push('│ ' + C.bold + C.cyan + title + C.reset + ' '.repeat(Math.max(0,width-3-title.length)) + '│');
     out.push('├' + '─'.repeat(width - 2) + '┤');
   }
   for (const l of lines) out.push('│ ' + (l || '').padEnd(width - 3) + '│');
