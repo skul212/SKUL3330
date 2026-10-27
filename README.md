@@ -52,3 +52,13 @@ aix
 ## License
 
 MIT
+
+## Quick Setup
+
+```bash
+git clone https://github.com/skul212/SKUL3330
+cd SKUL3330
+chmod +x setup.sh
+./setup.sh
+aix
+```
