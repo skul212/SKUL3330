@@ -14,7 +14,7 @@ const clear = () => process.stdout.write(ESC + '2J' + ESC + 'H');
 const hideCursor = () => process.stdout.write(ESC + '?25l');
 const showCursor = () => process.stdout.write(ESC + '?25h');
 
-let state = { screen: 'menu', idx: 0, filter: '', page: 0, pageSize: 18, selectedProvider: null, selectedModel: null };
+let state = { screen: 'menu', idx: 0, filter: '', page: 0, pageSize: 18, selectedProvider: null, selectedModel: null, chatMessages: [], chatInput: '' };
 let filtered = [];
 
 function box(title, lines) {
@@ -36,7 +36,7 @@ function render() {
   const cols = process.stdout.columns || 80;
   const rows = process.stdout.rows || 24;
   if (state.screen === 'menu') {
-    const items = ['Browse Providers (' + providers.length + ')', 'Browse Models (' + models.length + ')', 'Search Models', 'Stats', 'Exit'];
+    const items = ['Browse Providers (' + providers.length + ')', 'Browse Models (' + models.length + ')', 'Search Models', 'Chat', 'Stats', 'Exit'];
     const lines = items.map((it, i) => (i === state.idx ? '▶ ' + it : '  ' + it));
     lines.push('');
     lines.push('Use ↑↓ to navigate, Enter to select, q to quit');
@@ -84,6 +84,12 @@ function render() {
       'Press Esc to go back',
     ];
     process.stdout.write(box('Model Details', lines));
+  } else if (state.screen === 'chat') {
+    const lines = state.chatMessages.slice(-12).map(m => (m.role==='user'?'You: ':'AI:  ') + m.text);
+    if (!lines.length) lines.push('Type a message and press Enter. Esc to go back.');
+    lines.push('');
+    lines.push('Input: ' + state.chatInput);
+    process.stdout.write(box('Chat', lines));
   } else if (state.screen === 'stats') {
     const lines = [
       'Providers: ' + providers.length,
@@ -115,13 +121,14 @@ process.stdin.on('data', (buf) => {
   if (key === '\u0003' || key === 'q') { showCursor(); clear(); process.exit(0); }
   if (state.screen === 'menu') {
     if (key === '\u001b[A') state.idx = Math.max(0, state.idx - 1);
-    else if (key === '\u001b[B') state.idx = Math.min(4, state.idx + 1);
+    else if (key === '\u001b[B') state.idx = Math.min(5, state.idx + 1);
     else if (key === '\r') {
       if (state.idx === 0) { state.screen = 'providers'; state.idx = 0; state.page = 0; state.filter = ''; }
       else if (state.idx === 1) { state.screen = 'models'; state.idx = 0; state.page = 0; state.filter = ''; state.selectedProvider = null; }
       else if (state.idx === 2) { state.screen = 'models'; state.idx = 0; state.page = 0; state.filter = ''; state.selectedProvider = null; }
-      else if (state.idx === 3) { state.screen = 'stats'; }
-      else if (state.idx === 4) { showCursor(); clear(); process.exit(0); }
+      else if (state.idx === 3) { state.screen = 'chat'; state.chatInput=''; }
+      else if (state.idx === 4) { state.screen = 'stats'; }
+      else if (state.idx === 5) { showCursor(); clear(); process.exit(0); }
     }
   } else if (state.screen === 'providers') {
     if (key === '\u001b') { state.screen = 'menu'; state.idx = 0; }
@@ -143,6 +150,11 @@ process.stdin.on('data', (buf) => {
     else if (key === '\r') { const m = l[state.idx]; if (m) { state.selectedModel = m; state.screen = 'modeldetail'; } }
     else if (key === '\x7f') { state.filter = state.filter.slice(0, -1); state.idx = 0; state.page = 0; }
     else if (key.length === 1 && key >= ' ' && key <= '~') { state.filter += key; state.idx = 0; state.page = 0; }
+  } else if (state.screen === 'chat') {
+    if (key === '\u001b') { state.screen='menu'; }
+    else if (key === '\r') { if (state.chatInput.trim()){ state.chatMessages.push({role:'user',text:state.chatInput}); state.chatMessages.push({role:'assistant',text:'Echo: '+state.chatInput}); state.chatInput=''; } }
+    else if (key === '\x7f') { state.chatInput=state.chatInput.slice(0,-1); }
+    else if (key.length===1 && key>=' ' && key<='~') { state.chatInput += key; }
   } else if (state.screen === 'modeldetail' || state.screen === 'stats') {
     if (key === '\u001b' || key === '\r') { state.screen = state.screen === 'modeldetail' ? 'models' : 'menu'; }
   }
