@@ -105,6 +105,7 @@ function providersList() {
   return q ? providers.filter(p => p.toLowerCase().includes(q)) : providers;
 }
 
+if(!process.stdin.isTTY){console.error("AI-X CLI requires an interactive terminal (TTY).");process.exit(1);}
 process.stdin.setRawMode(true);
 process.stdin.resume();
 hideCursor();
